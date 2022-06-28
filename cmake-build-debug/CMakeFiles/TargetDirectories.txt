@@ -1,3 +1,0 @@
-D:/DNS-Relay/cmake-build-debug/CMakeFiles/DNS_Relay.dir
-D:/DNS-Relay/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/DNS-Relay/cmake-build-debug/CMakeFiles/rebuild_cache.dir
