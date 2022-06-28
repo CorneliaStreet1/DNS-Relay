@@ -53,3 +53,5 @@ dkms.conf
 # CLion Configs
 .idea/
 cmake-build-debug/
+# Visual Studio Configs
+.vs/
