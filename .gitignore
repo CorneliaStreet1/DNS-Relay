@@ -55,3 +55,5 @@ dkms.conf
 cmake-build-debug/
 # Visual Studio Configs
 .vs/
+# Visual Studio Code Configs
+.vscode/
