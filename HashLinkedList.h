@@ -1,19 +1,19 @@
-typedef struct node
+typedef struct Myhash_node
 {
     char* IP;
     char* DomainName;
     long long TimeStamp;
-    struct node* Next;
-    struct node* Previous;
+    struct Myhash_node* Next;
+    struct Myhash_node* Previous;
 } HashNode;
-typedef struct Hash_Linked_List
+typedef struct MyHash_Linked_List
 {
     HashNode* Head;
     HashNode* Tail;
 }  HashLinkedList;
-HashLinkedList * GetEmptyList();
-void AddLast(HashLinkedList * List, char * IP, char* DomainName);
-void AddFirst(HashLinkedList * List, char * IP, char* DomainName);
-HashNode* RemoveFirst(HashLinkedList* List);
-HashNode* RemoveLast(HashLinkedList* List);
-void printList(HashLinkedList* List);
+HashLinkedList * GetEmptyHashList();
+void HashAddLast(HashLinkedList * List, char * IP, char* DomainName);
+void HashAddFirst(HashLinkedList * List, char * IP, char* DomainName);
+HashNode* HashRemoveFirst(HashLinkedList* List);
+HashNode* HashRemoveLast(HashLinkedList* List);
+void HashprintList(HashLinkedList* List);

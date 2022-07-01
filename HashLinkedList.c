@@ -1,7 +1,8 @@
 #include "HashLinkedList.h"
 #include<stdlib.h>
 #include<time.h>
-HashLinkedList * GetEmptyList() {
+#include<stdio.h>
+HashLinkedList * GetEmptyHashList() {
     HashLinkedList* List = malloc(sizeof(HashLinkedList));
     List->Head = malloc(sizeof(HashNode));
     List->Tail = malloc(sizeof(HashNode));
@@ -17,7 +18,7 @@ HashLinkedList * GetEmptyList() {
     List->Tail->TimeStamp = 0;
     return List;
 }
-void AddLast(HashLinkedList * List, char * IP, char* DomainName) {
+void HashAddLast(HashLinkedList * List, char * IP, char* DomainName) {
     HashNode* newLast = malloc(sizeof(HashNode));
     HashNode* OldLast = List->Tail->Previous;
     newLast->DomainName = DomainName;
@@ -28,7 +29,7 @@ void AddLast(HashLinkedList * List, char * IP, char* DomainName) {
     newLast->Next = List->Tail;
     List->Tail->Previous = newLast; 
 }
-void AddFirst(HashLinkedList * List, char * IP, char* DomainName) {
+void HashAddFirst(HashLinkedList * List, char * IP, char* DomainName) {
     HashNode* OldFirst = List->Head->Next;
     HashNode* newFirst = malloc(sizeof(HashNode));
     newFirst->DomainName = DomainName;
@@ -39,7 +40,7 @@ void AddFirst(HashLinkedList * List, char * IP, char* DomainName) {
     OldFirst->Previous = newFirst;
     List->Head->Next = newFirst;
 }
-void printList(HashLinkedList* List) {
+void HashprintList(HashLinkedList* List) {
     HashNode* p = List->Head->Next;
     while (p != List->Tail){
         printf("IP: ");
@@ -47,7 +48,7 @@ void printList(HashLinkedList* List) {
         printf("  DomainName:");
         printf(p->DomainName);
         printf("  TImeStamp:");
-        printf(p->TimeStamp);
+        printf("%lld",p->TimeStamp);
         printf("\n");
         p = p->Next;
     }
