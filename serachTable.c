@@ -11,10 +11,10 @@
 //	printf("%s", ip);
 //}
 
-node* init() {
+fnode* init() {
 	char* ip[FILE_SIZE] = { NULL };
 	char* name[FILE_SIZE] = { NULL };
-	node hashTable[HASH_SIZE];
+	fnode hashTable[HASH_SIZE];
 	for (int i = 0; i < HASH_SIZE; i++) {
 		hashTable[i].next = hashTable[i].ip = hashTable[i].name = NULL;
 	}
@@ -75,7 +75,7 @@ int hashFunction(char*str) {
 	return hash >0?hash:(-1*hash);
 }
 
-void getHash(node* hashTable,char**name,char**ip) {
+void getHash(fnode* hashTable,char**name,char**ip) {
 	for (int i = 0; name[i]!=NULL; i++) {
 		int hash = hashFunction(name[i]);
 		if (hashTable[hash].name == NULL) {
@@ -84,11 +84,11 @@ void getHash(node* hashTable,char**name,char**ip) {
 			hashTable[hash].next = NULL;
 		}
 		else {
-			node* newNode = (node*)malloc(sizeof(node));
+			fnode* newNode = (fnode*)malloc(sizeof(fnode));
 			(*newNode).ip = ip[i];
 			(*newNode).name = name[i];
 			(*newNode).next = NULL;
-			node* temp = &hashTable[hash];
+			fnode* temp = &hashTable[hash];
 			while ((*temp).next != NULL) {
 				temp = (*temp).next;
 			}
@@ -107,10 +107,10 @@ void exchangeLower(char*str) {
 	}
 }
 
-char* serach(char*str,node* hashTable) {
+char* serach(char*str,fnode* hashTable) {
 	exchangeLower(str);
 	int hash = hashFunction(str);
-	node* temp = &hashTable[hash];
+	fnode* temp = &hashTable[hash];
 	if (hashTable[hash].name == NULL) {
 		return NULL;
 	}
