@@ -28,6 +28,7 @@ void AddLast(LinkedList * List, char * IP, char* DomainName) {
     List->Size += 1;
 }
 void AddFirst(LinkedList* List,char * IP, char* DomainName) {
+    printf("addFirst begin\n");
     Node* OldFirst = List->Head->Next;
     Node* newFirst =(Node*) malloc(sizeof(Node));
     newFirst->DomainName = DomainName;
@@ -37,6 +38,7 @@ void AddFirst(LinkedList* List,char * IP, char* DomainName) {
     OldFirst->Previous = newFirst;
     List->Head->Next = newFirst;
     List->Size += 1;
+    printf("addFirst end\n");
 }
 Node* RemoveFirst(LinkedList* List) {
     Node* FirstNode = List->Head->Next;
@@ -50,14 +52,21 @@ Node* RemoveFirst(LinkedList* List) {
     return returnNode;
 }
 Node* RemoveLast(LinkedList* List) {
+    printf("removeLast begin\n");
     Node* LastNode = List->Tail->Previous;
+    printf("LastNode.domainName:%s\nLastNode.IP:%s\n", LastNode->DomainName, LastNode->IP);
+    if (LastNode->DomainName == NULL) {
+        printf("LastNode ptr:%p\n", LastNode);
+        printf("List head ptr:%p\nList tail ptr:%p\n", List->Head, List->Tail);
+    }
     Node* returnNode =(Node*) malloc(sizeof(Node));
     returnNode->DomainName = LastNode->DomainName;
     returnNode->IP = LastNode->IP;
     LastNode->Previous->Next = List->Tail;
     List->Tail->Previous = LastNode->Previous;
-    free(LastNode);
+    free(LastNode);//直接返回returnNode，断开连接不就行了？
     List->Size -= 1;
+    printf("removeLast end\n");
     return returnNode;
 }
 int isEmpty(LinkedList* List) {

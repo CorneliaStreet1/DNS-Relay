@@ -28,6 +28,12 @@ void HashAddLast(HashLinkedList * List, char * IP, char* DomainName) {
     newLast->Previous = OldLast;
     newLast->Next = List->Tail;
     List->Tail->Previous = newLast; 
+    printf("add list node after node:%s\n", OldLast->DomainName);
+    printf("now list node is:%s\n", List->Tail->Previous->DomainName);
+    printf("tail previous ptr:%p\n", List->Tail->Previous);
+    printf("add tail ptr:%p\n", List->Tail);
+    printf("now list node is:%s\n", OldLast->Next->DomainName);
+    printf("oldLast ptr:%p\n", OldLast);
 }
 void HashAddFirst(HashLinkedList * List, char * IP, char* DomainName) {
     HashNode* OldFirst = List->Head->Next;

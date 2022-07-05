@@ -595,7 +595,7 @@ char* ipInt2ipChar(int ipInt) {
 		len += strlen(charArray[i]);
 	}
 
-	char* ipChar=(char*)malloc(sizeof(char)*len);
+	char* ipChar=(char*)malloc(sizeof(char)*len+5);
 	int ptrNum = 0;
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; charArray[i][j] != '\0'; ++j) {
@@ -653,6 +653,7 @@ int searchLocal(struct DNSmessage* message) {
 	for (; midQ != NULL; midQ = midQ->next) {
 		char* DNSdomainName = midQ->realname;
 		char* realname = (char*)malloc(sizeof(char) * midQ->realLen);
+		printf("%p\n", realname);
 		DNSdomain2domain(DNSdomainName, realname);
 		Result* result = Get_Cached_IP_By_DomainName(cache, realname);
 		if (result==NULL) {//cache没找到
@@ -660,6 +661,8 @@ int searchLocal(struct DNSmessage* message) {
 			printf("domain name:%s\n", realname);
 			char* fileIP = serach(realname, fileTable);
 			if (fileIP == NULL) {//txt没找到
+				printf("%p\n", realname);
+				free(realname);//没找到记得释放
 				printf("文件没找到\n");
 				delRR(message->answer);
 				message->h.ancount = 0;
@@ -670,16 +673,28 @@ int searchLocal(struct DNSmessage* message) {
 				printf("ip:%s\n", fileIP);
 				printf("domain:%s\n", realname);
 				char* copyIP = (char*)malloc(sizeof(char) * 20);
-				char* copyDomain = (char*)malloc(sizeof(char) * midQ->realLen);
 				strcpy_s(copyIP, 20, fileIP);
-				strcpy_s(copyDomain, midQ->realLen ,realname);
-				AddNewItem(cache, copyDomain, copyIP);//加入cache
+				char* copyDomain = (char*)malloc(sizeof(char) * midQ->realLen);
+				strcpy_s(copyDomain, midQ->realLen, realname);
+
+				
+				
+				
 
 				if (strcmp(fileIP, "0.0.0.0") == 0) {
 					printf("file查到屏蔽ip\n");
 					delRR(message->answer);
 					message->h.ancount = 0;
 					message->h.flags.rcode = 3;
+
+					if (Get_Cached_IP_By_DomainName(cache, realname) == NULL) {
+						AddNewItem(cache, copyDomain, copyIP);//加入cache
+					}
+					else {
+						free(copyIP);
+						free(copyDomain);
+					}
+					free(realname);//记得释放
 					return 0;
 				}
 
@@ -696,6 +711,15 @@ int searchLocal(struct DNSmessage* message) {
 				}
 				printf("\n");
 				addRR(message, answerDNSdomain, midQ->realLen, NULL, 0, 1, 1, 86400, 4, rdData);
+
+				if (Get_Cached_IP_By_DomainName(cache, realname) == NULL) {
+					AddNewItem(cache, copyDomain, copyIP);//加入cache
+				}
+				else {
+					free(copyIP);
+					free(copyDomain);
+				}
+				free(realname);//记得释放
 			}
 		}
 		else if(strcmp(result->IP,"0.0.0.0")==0) {//屏蔽ip
@@ -704,6 +728,7 @@ int searchLocal(struct DNSmessage* message) {
 			message->h.ancount = 0;
 			message->h.flags.rcode = 3;
 			message->h.flags.qr = 1;
+			free(realname);//记得释放
 			return 0;
 		}
 		else {//cache找到了
@@ -721,6 +746,7 @@ int searchLocal(struct DNSmessage* message) {
 			}
 			printf("\n");
 			addRR(message, answerDNSdomain, midQ->realLen, NULL, 0, 1, 1, result->TimeToLive, 4, rdData);
+			free(realname);//记得释放
 		}
 	}
 	return 1;
@@ -738,7 +764,15 @@ void dns2cache(struct DNSmessage* message) {
 			memcpy(&ipInt, r->rdData, 4);
 			ipInt = ntohl(ipInt);
 			char* ipChar = ipInt2ipChar(ipInt);
-			AddNewItem(cache, domainName, ipChar);
+			if (Get_Cached_IP_By_DomainName(cache, domainName) == NULL) {
+				AddNewItem(cache, domainName, ipChar);
+			}
+			else {
+				free(domainName);
+				printf("free domainName ok\n");
+				free(ipChar);
+				printf("free domain ip ok\n");
+			}
 		}
 	}
 	printf("dns2cache end\n");
@@ -863,6 +897,29 @@ int main() {
 	while (1) {
 		recvAndSend();
 	}
+
+
+	//test
+	/*struct DNSmessage message;
+	message.h.flags.qr = 0;
+	message.h.qdcount = 1;
+	message.q = (struct question*)malloc(sizeof(struct question));
+	message.q->realname = (char*)malloc(sizeof(char)*10);
+	char mid[10];
+	char testmid[10];
+	memcpy(testmid, "test0", 6);
+	domain2DNSdomain(testmid, mid);
+	memcpy(message.q->realname, mid, 7);
+	message.q->realLen = 7;
+	message.answer = NULL;
+	message.additional = NULL;
+	message.authority = NULL;
+
+	searchLocal(&message);
+	searchLocal(&message);*/
+
+
+
 	closesocket(mySock);
 	WSACleanup();
 	return 0;

@@ -1,5 +1,5 @@
 #include "HashLinkedList.h"
-#define TTL 86400
+#define TTL 3
 #define MaxCacheNumber 75
 #define BucketNumber 100
 typedef struct CacheResult

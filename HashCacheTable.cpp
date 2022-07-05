@@ -15,13 +15,13 @@ Result* Get_Cached_IP_By_DomainName(HashCacheTable* Table, char* DomainName) {
 }
 void AddNewItem(HashCacheTable* Table, char* DomainName, char* IP) {
     int index = getIndex(DomainName);
-    if (Table->CacheTable->size == MaxCacheNumber && Table->LRUList->Size == MaxCacheNumber)
+    if (Table->CacheTable->size == MaxCacheNumber && Table->LRUList->Size == MaxCacheNumber)//长度远远超过75
     {
         printf("Cache full,replacing by LRU\n");
         AddNewRecord(Table->CacheTable, IP, DomainName);
         AddFirst(Table->LRUList, IP, DomainName);
         Node* n = RemoveLast(Table->LRUList);
-        Remove(Table->CacheTable, IP, DomainName);
+        Remove(Table->CacheTable, n->IP, n->DomainName);//这里，name和ip都有问题
         printf("Removed record: IP: ");
         printf(n->IP);
         printf("  DomainName:");
@@ -37,4 +37,7 @@ void AddNewItem(HashCacheTable* Table, char* DomainName, char* IP) {
         printf(DomainName);
         printf("\n");
     }
+    printf("\n这里这里开始\n");
+    printList(Table->LRUList);
+    printf("这里这里结束\n\n");
 }
