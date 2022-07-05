@@ -59,8 +59,8 @@ int getTable(char**ip,char**name) {
 				name[line][i] = buf[lenIP + i];
 			}
 			name[line][i] = '\0';
-			printf("%s\n", ip[line]);
-			printf("%s\n", name[line]);
+			//printf("%s\n", ip[line]);
+			//printf("%s\n", name[line]);
 			line++;
 		}
 	}
@@ -112,36 +112,36 @@ void exchangeLower(char*str) {
 }
 
 char* serach(char*str,fnode* hashTable) {//传给这个函数的str记得复制一遍再传，因为改了大小写
-	printf("search file begin\n");
+	//printf("search file begin\n");
 	exchangeLower(str);
 	int hash = hashFunction(str);
-	printf("hashFunction is ok\n");
+	//printf("hashFunction is ok\n");
 	fnode* temp = &hashTable[hash];
-	if (temp == NULL) {
+	/*if (temp == NULL) {
 		printf("temp is NULL\n");
 	}
 	else {
 		printf("name:%s\n", temp->name);
-	}
+	}*/
 	if (hashTable[hash].name == NULL) {
-		printf("search short end\n");
+		//printf("search short end\n");
 		return NULL;
 	}
-	printf("while begin\n");
+	//printf("while begin\n");
 	while (temp != NULL) {
 		printf("1\n");
 		if (temp->name == NULL) {
 			printf("name == NULL, error\n");
 		}
-		printf("temp.next:%X\n", temp->next);
-		printf("temp.name:%s\n", temp->name);
+		//printf("temp.next:%X\n", temp->next);
+		//printf("temp.name:%s\n", temp->name);
 		if (strcmp((*temp).name, str) == 0) {
-			printf("temp ip:%s\n", temp->ip);
+			//printf("temp ip:%s\n", temp->ip);
 			return (*temp).ip;
 		}
 		
 		temp = (*temp).next;
 	}
-	printf("search end\n");
+	//printf("search end\n");
 	return NULL;
 }

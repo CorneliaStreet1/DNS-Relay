@@ -35,21 +35,21 @@ int getIndex(char* DomainName) {
     return floorMod(NodeStringHashCode(DomainName), BucketNumber);
 }
 
-Result* Get_IP_By_DomainName(struct Hash_Table* Table, char* DomainName) {
-    printf("getIpByDomain begin\n");
+Result* Get_IP_By_DomainName(struct Hash_Table* Table, char* DomainName,LinkedList* LRU) {
+    //printf("getIpByDomain begin\n");
     int index = getIndex(DomainName);
-    printf("index:%d\n", index);
+    //printf("index:%d\n", index);
     HashLinkedList* L = Table->Bucket[index];
-    printf("bound is ok\n");
+    //printf("bound is ok\n");
     HashNode* p = L->Head->Next;
-    printf("get ip list tail:%p\n", L->Tail);
-    printf("get ip list head:%p\n", L->Head);
-    if (p == NULL) {
+    //printf("get ip list tail:%p\n", L->Tail);
+    //printf("get ip list head:%p\n", L->Head);
+   /* if (p == NULL) {
         printf("p is NULL\n");
     }
     else {
         printf("p.domainname:%s\n", p->DomainName);
-    }
+    }*/
     /*while (p->DomainName != NULL && strcmp(p->DomainName, DomainName) != 0 && p != L->Tail)
     {
         printf("p.domainName:%s\n", p->DomainName);
@@ -59,24 +59,24 @@ Result* Get_IP_By_DomainName(struct Hash_Table* Table, char* DomainName) {
     while ( p != L->Tail)
     {
         if (p->DomainName != NULL && strcmp(p->DomainName, DomainName) == 0) {
-            printf("break\n");
+            //printf("break\n");
             break;
         }
-        printf("p.domainName:%s\n", p->DomainName);
+        /*printf("p.domainName:%s\n", p->DomainName);
         printf("p ptr:%p\n", p);
-        printf("p.domainName.next:%s\n", p->Next->DomainName);
+        printf("p.domainName.next:%s\n", p->Next->DomainName);*/
         p = p->Next;
     }
 
-    printf("while end\n");
+    //printf("while end\n");
     if (p == L->Tail || p == NULL)
     {
-        printf("空\n");
+        //printf("空\n");
         return NULL;
     }
     else if (strcmp(p->DomainName, DomainName) == 0)
     {
-        printf("非空\n");
+        //printf("非空\n");
         long long PastTime = time(NULL) - p->TimeStamp;
         if (PastTime >= TTL)
         {
@@ -84,9 +84,11 @@ Result* Get_IP_By_DomainName(struct Hash_Table* Table, char* DomainName) {
             HashNode* Next = p->Next;
             Pre->Next = Next;
             Next->Previous = Pre;
-            printf("del pastTime p name:%s\n", p->DomainName);
-            printf("del pastTime p ptr:%p\n", p);
+            //printf("del pastTime p name:%s\n", p->DomainName);
+            //printf("del pastTime p ptr:%p\n", p);
+            RemoveNode(LRU, p->DomainName);
             free(p);//这里去掉这个节点没减长度
+            
             return NULL;
         }
         else {
@@ -97,7 +99,7 @@ Result* Get_IP_By_DomainName(struct Hash_Table* Table, char* DomainName) {
         }
         
     }
-    printf("getIpByDomain end\n");
+    //printf("getIpByDomain end\n");
     return NULL;
 }
 void AddNewRecord(struct Hash_Table* Table,char* IP,char* DomainName) {
@@ -106,18 +108,18 @@ void AddNewRecord(struct Hash_Table* Table,char* IP,char* DomainName) {
     HashAddLast(Table->Bucket[index], IP, DomainName);
 }
 void Remove(struct Hash_Table* Table,char* IP,char* DomainName) {
-    printf("remove begin\n");
+    //printf("remove begin\n");
     int index = getIndex(DomainName);
     HashLinkedList* L = Table->Bucket[index];
     HashNode* p = L->Head->Next;
-    printf("p.domainName:%s\np.ip:%s\n", p->DomainName, p->IP);
+    //printf("p.domainName:%s\np.ip:%s\n", p->DomainName, p->IP);
     while (p != L->Tail && strcmp(p->DomainName, DomainName) != 0 )
     {
         p = p->Next;
     }
     if (p == NULL || p == L->Tail)
     {
-        printf("remove end\n");
+        //printf("remove end\n");
         return;
     }
     
@@ -139,5 +141,5 @@ void Remove(struct Hash_Table* Table,char* IP,char* DomainName) {
             printf(DomainName);
         }
     }
-    printf("remove end\n");
+    //printf("remove end\n");
 }

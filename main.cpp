@@ -20,8 +20,6 @@
 #define BUFNUM 1024
 #define	IDTIME 2
 
-//typedef struct sockaddr_in sockaddr_in;
-//typedef struct sockaddr sockaddr;
 
 //ip地址和中继的sock
 sockaddr_in myaddr, recvaddr, dnsaddr;
@@ -29,9 +27,17 @@ SOCKET mySock;
 
 char buf[BUFNUM] = { 0 };
 
+int DNSnum = 0;
+
+
+//cache和txt
 fnode* fileTable=NULL;
 
 HashCacheTable* cache=NULL;
+
+//命令行参数
+int argNum = 0;
+char** argArray = NULL;
 
 //初始化sock
 void initSock() {
@@ -56,11 +62,17 @@ void initSock() {
 	myaddr.sin_port = htons(53);
 	myaddr.sin_addr.S_un.S_addr = INADDR_ANY;
 
-	char ipDefaultDNS[20] = "192.168.1.1";//10.3.9.44/192.168.1.1
+	char ipDefaultDNS[20] = "10.3.9.44";//10.3.9.44/192.168.1.1
 	char ipOtherDNS[20] = { 0 };
 	char ipDNS[20] = { 0 };
 
-	memcpy(ipDNS, ipDefaultDNS, 20);
+	if (argNum <= 1) {
+		memcpy(ipDNS, ipDefaultDNS, 20);
+	}
+	else {
+		int len = strlen(argArray[1]);
+		memcpy(ipDNS, argArray[1], len);
+	}
 
 	dnsaddr.sin_family = AF_INET;
 	dnsaddr.sin_port = htons(53);
@@ -71,6 +83,8 @@ void initSock() {
 	fileTable = init();
 
 	cache = GetNewCacheTable();
+
+	DNSnum = 0;
 
 	printf("初始化完成\n");
 }
@@ -146,12 +160,12 @@ void getRealName(char* buf, char* bufBegin, char** pRealname,int pNum) {
 	int len = 0;
 	for (; buf[len] != 0 &&(unsigned char) buf[len] < 0xC0; ++len,++pNum) {
 		(*pRealname)[pNum] = buf[len];
-		printf("%02X ",(unsigned char) buf[len]);
+		//printf("%02X ",(unsigned char) buf[len]);
 	}
-	printf("\n");
+	//printf("\n");
 	if (buf[len] == 0) {
 		(*pRealname)[pNum] = 0;
-		printf("get realname:%s\n", *pRealname);
+		//printf("get realname:%s\n", *pRealname);
 		return;
 	}
 	else {
@@ -182,13 +196,13 @@ int getDomainName(char* buf,char* bufBegin,char** pname,char** pRealname,unsigne
 		*pnameLen = i;
 		memcpy(*pname, buf, i);
 	}
-	printf("name:%s\n", *pname);
+	/*printf("name:%s\n", *pname);
 	for (int k = 0; k < i; ++k) {
 		printf("%02X ", (* pname)[k] );
 	}
-	printf("\n");
+	printf("\n");*/
 	*pRealLen = getRealLen(*pname, bufBegin);
-	printf("realLen:%d\n", *pRealLen);
+	//printf("realLen:%d\n", *pRealLen);
 	*pRealname = (char*)malloc(sizeof(char) * (*pRealLen));
 	getRealName(*pname, bufBegin, pRealname, 0);
 	return i;
@@ -279,7 +293,7 @@ void string2rr(char** pbuf, char* bufBegin, struct rr* r, int count) {
 		r->rdLen = read16bit(pbuf);
 
 		r->rdData = (char*)malloc(sizeof(char) * (r->rdLen));
-		printf("rdLen:%X\n", r->rdLen);
+		//printf("rdLen:%X\n", r->rdLen);
 		memcpy(r->rdData, *pbuf, r->rdLen);
 		*pbuf += r->rdLen;
 
@@ -419,7 +433,7 @@ void addRR(	struct DNSmessage* message,char* name, unsigned short nameLen, char*
 	struct rr* r = (struct rr*)malloc(sizeof(struct rr));
 	r->name = name;
 	r->nameLen = nameLen;
-	printf("name:%s\nnameLen:%d\n", name, nameLen);
+	//printf("name:%s\nnameLen:%d\n", name, nameLen);
 
 	r->realname = realname;
 	r->realLen = realLen;
@@ -454,13 +468,13 @@ void delRR(struct rr* r) {
 	for (; r != NULL; r = next) {
 		next = r->next;
 		free(r->name);
-		printf("name free\n");
+		//printf("name free\n");
 		free(r->realname);
-		printf("real name free\n");
+		//printf("real name free\n");
 		free(r->rdData);
-		printf("rdData free\n");
+		//printf("rdData free\n");
 		free(r);
-		printf("r free\n");
+		//printf("r free\n");
 	}
 }
 
@@ -469,7 +483,7 @@ void delMessage(struct DNSmessage* message) {
 	delRR(message->answer);
 	delRR(message->authority);
 	delRR(message->additional);
-	printf("delMessage finish\n");
+	//printf("delMessage finish\n");
 }
 
 //打印DNSmessage
@@ -481,8 +495,8 @@ void printMessage(struct DNSmessage message) {
 
 //正常域名和DNS域名的相互转化
 void domain2DNSdomain(char* domain, char* DNSdomain) {
-	printf("domain2DNSdomain begin\n");
-	printf("domain:%s", domain);
+	//printf("domain2DNSdomain begin\n");
+	//printf("domain:%s", domain);
 	int i = 0, j = 0;
 	int partLen = 0;
 	for (; domain[i] != '\0'; ++i) {
@@ -504,13 +518,13 @@ void domain2DNSdomain(char* domain, char* DNSdomain) {
 		DNSdomain[j] = domain[k];
 	}
 	DNSdomain[j] = 0;
-	printf("DNSdomain:%s\n", DNSdomain);
-	printf("domain2DNSdomain end\n");
+	//printf("DNSdomain:%s\n", DNSdomain);
+	//printf("domain2DNSdomain end\n");
 }
 
 void DNSdomain2domain(char* DNSdomain, char* domain) {
-	printf("DNSdomain2domain begin\n");
-	printf("DNSdomain:%s\n", DNSdomain);
+	//printf("DNSdomain2domain begin\n");
+	//printf("DNSdomain:%s\n", DNSdomain);
 	int i = 0, j = 0, partLen = 0;
 	for (; DNSdomain[j] != 0;) {
 		partLen = DNSdomain[j];
@@ -523,14 +537,14 @@ void DNSdomain2domain(char* DNSdomain, char* domain) {
 		i++;
 	}
 	domain[i - 1] = '\0';
-	printf("test\n");
-	printf("DNSdomain:%s\n", DNSdomain);
+	//printf("test\n");
+	/*printf("DNSdomain:%s\n", DNSdomain);
 	for (int m = 0; DNSdomain[m] != '\0'; ++m) {
 		printf("%02X ", (unsigned char)DNSdomain[m]);
 	}
 	printf("\n");
 	printf("domain:%s\n", domain);
-	printf("DNSdomain2domain end\n");
+	printf("DNSdomain2domain end\n");*/
 }
 
 
@@ -561,7 +575,7 @@ void changeNewId(struct DNSmessage* message,sockaddr_in cilentaddr) {
 	idTable[i].endTime = nowtime + IDTIME;
 
 	message->h.id = i;
-	printf("new id:%d\n", message->h.id);
+	//printf("new id:%d\n", message->h.id);
 }
 
 void changeOldId(struct DNSmessage* message,sockaddr_in* cilentaddr) {
@@ -571,7 +585,7 @@ void changeOldId(struct DNSmessage* message,sockaddr_in* cilentaddr) {
 		printf("id-map error:id time too small\n");
 	}
 	else {
-		printf("oldId:%d\n", idTable[id].oldId);
+		//printf("oldId:%d\n", idTable[id].oldId);
 		message->h.id = idTable[id].oldId;
 		*cilentaddr = idTable[id].cilentaddr;
 		idTable[id].endTime = nowtime;
@@ -582,7 +596,7 @@ void changeOldId(struct DNSmessage* message,sockaddr_in* cilentaddr) {
 char* ipInt2ipChar(int ipInt) {
 	unsigned char byteArray[4] = { 0 };
 	unsigned int mask = 0xFF000000;
-	int maskNum = 24;//是24，记得改
+	int maskNum = 24;
 	for (int i = 0; i < 4; ++i,mask>>=4,maskNum-=8) {
 		byteArray[i] = (ipInt & mask) >> maskNum;
 	}
@@ -610,16 +624,16 @@ char* ipInt2ipChar(int ipInt) {
 			ipChar[ptrNum] = '\0';
 		}
 	}
-	printf("ipChar:%s\n", ipChar);
+	//printf("ipChar:%s\n", ipChar);
 	return ipChar;
 }
 
 int ipChar2ipInt(char* ipChar) {
-	printf("ipChar2ipInt begin\n");
+	//printf("ipChar2ipInt begin\n");
 	char* charArray[4] = { 0 };
 	char ip[20] = { 0 };
 	strcpy_s(ip,20, ipChar);
-	printf("copyip:%s\n", ip);
+	//printf("copyip:%s\n", ip);
 	charArray[0] = ip;
 	int arrayNum = 1;
 	for (int i = 0; ip[i] != '\0'; ++i) {
@@ -629,22 +643,22 @@ int ipChar2ipInt(char* ipChar) {
 			arrayNum++;
 		}
 	}
-	for (int i = 0; i < 4; ++i) {
+	/*for (int i = 0; i < 4; ++i) {
 		printf("ip part %d:%s\n", i, charArray[i]);
-	}
+	}*/
 	
 	unsigned int byteMid;
 	int ipInt = 0;
 	int moveNum = 24;
 	for (int i = 0; i < 4; ++i) {
 		byteMid = atoi(charArray[i]);
-		printf("byteMid %d:%d\n", i, byteMid);
+		//printf("byteMid %d:%d\n", i, byteMid);
 		byteMid <<= moveNum;
 		moveNum -= 8;
 		ipInt += byteMid;
 	}
-	printf("ipInt:%X\n", ipInt);
-	printf("ipChar2ipInt end\n");
+	//printf("ipInt:%X\n", ipInt);
+	//printf("ipChar2ipInt end\n");
 	return ipInt;
 }
 
@@ -653,15 +667,15 @@ int searchLocal(struct DNSmessage* message) {
 	for (; midQ != NULL; midQ = midQ->next) {
 		char* DNSdomainName = midQ->realname;
 		char* realname = (char*)malloc(sizeof(char) * midQ->realLen);
-		printf("%p\n", realname);
+		//printf("%p\n", realname);
 		DNSdomain2domain(DNSdomainName, realname);
 		Result* result = Get_Cached_IP_By_DomainName(cache, realname);
 		if (result==NULL) {//cache没找到
 			printf("cache没找到\n");
-			printf("domain name:%s\n", realname);
+			//printf("domain name:%s\n", realname);
 			char* fileIP = serach(realname, fileTable);
 			if (fileIP == NULL) {//txt没找到
-				printf("%p\n", realname);
+				//printf("%p\n", realname);
 				free(realname);//没找到记得释放
 				printf("文件没找到\n");
 				delRR(message->answer);
@@ -670,8 +684,8 @@ int searchLocal(struct DNSmessage* message) {
 			}
 			else {//txt找到了
 				printf("文件找到了：\n");
-				printf("ip:%s\n", fileIP);
-				printf("domain:%s\n", realname);
+				//printf("ip:%s\n", fileIP);
+				//printf("domain:%s\n", realname);
 				char* copyIP = (char*)malloc(sizeof(char) * 20);
 				strcpy_s(copyIP, 20, fileIP);
 				char* copyDomain = (char*)malloc(sizeof(char) * midQ->realLen);
@@ -705,11 +719,11 @@ int searchLocal(struct DNSmessage* message) {
 				IPint = htonl(IPint);
 				char* rdData = (char*)malloc(sizeof(int));
 				memcpy(rdData, &IPint, 4);
-				printf("ipv4:\n");
+				/*printf("ipv4:\n");
 				for (int i = 0; i < 4; ++i) {
 					printf("%02X ", rdData[i]);
 				}
-				printf("\n");
+				printf("\n");*/
 				addRR(message, answerDNSdomain, midQ->realLen, NULL, 0, 1, 1, 86400, 4, rdData);
 
 				if (Get_Cached_IP_By_DomainName(cache, realname) == NULL) {
@@ -740,11 +754,11 @@ int searchLocal(struct DNSmessage* message) {
 			IPint = htonl(IPint);
 			char* rdData = (char*)malloc(sizeof(int));
 			memcpy(rdData, &IPint, 4);
-			printf("ipv4:\n");
+			/*printf("ipv4:\n");
 			for (int i = 0; i < 4; ++i) {
 				printf("%02X ", rdData[i]);
 			}
-			printf("\n");
+			printf("\n");*/
 			addRR(message, answerDNSdomain, midQ->realLen, NULL, 0, 1, 1, result->TimeToLive, 4, rdData);
 			free(realname);//记得释放
 		}
@@ -753,9 +767,9 @@ int searchLocal(struct DNSmessage* message) {
 }
 
 void dns2cache(struct DNSmessage* message) {
-	printf("dns2cache begin\n");
+	//printf("dns2cache begin\n");
 	struct rr* r = message->answer;
-	printf("answer:%X\n", message->answer);
+	//printf("answer:%X\n", message->answer);
 	for (; r != NULL; r = r->next) {
 		if (r->type == 1 && r->rclass==1 ) {
 			char* domainName = (char*)malloc(sizeof(char) * r->realLen);
@@ -769,15 +783,22 @@ void dns2cache(struct DNSmessage* message) {
 			}
 			else {
 				free(domainName);
-				printf("free domainName ok\n");
+				//printf("free domainName ok\n");
 				free(ipChar);
-				printf("free domain ip ok\n");
+				//printf("free domain ip ok\n");
 			}
 		}
 	}
-	printf("dns2cache end\n");
+	//printf("dns2cache end\n");
 }
 
+void printTime(time_t nowtime) {
+	struct tm nowTime;
+	struct tm* sTime=&nowTime;
+	localtime_s(sTime,&nowtime);
+	printf("time:%d/%d/%d %d:%d:%d\n", sTime->tm_year + 1900, sTime->tm_mon, sTime->tm_mday, sTime->tm_hour, sTime->tm_min, sTime->tm_sec);
+	
+}
 
 //发送接收模块
 void recvAndSend() {
@@ -790,6 +811,9 @@ void recvAndSend() {
 
 	char ip[20];
 	inet_ntop(AF_INET, &recvaddr.sin_addr, ip, 20);
+	printf("Num:%d\n", DNSnum);
+	DNSnum++;
+	printTime(time(NULL));
 	printf("recv ip:%s\nrecv port:%d\nrecvNum:%d\nrecv buf:\n", ip,ntohs(recvaddr.sin_port), recvNum);
 	for (int i = 0; i < recvNum; ++i) {
 		if (i != 0 && i % 16 == 0) {
@@ -826,8 +850,8 @@ void recvAndSend() {
 
 			if (isFind == -1) {
 				changeNewId(&message, recvaddr);
-				inet_ntop(AF_INET, &recvaddr.sin_addr, ip, 20);
-				printf("recvaddr ip:%s,port:%d\n", ip, ntohs(recvaddr.sin_port));
+				//inet_ntop(AF_INET, &recvaddr.sin_addr, ip, 20);
+				//printf("recvaddr ip:%s,port:%d\n", ip, ntohs(recvaddr.sin_port));
 				int sendNum = message2string(&message, buf);
 
 				printf("send buf:\n");
@@ -868,7 +892,7 @@ void recvAndSend() {
 		else {//接收到服务器的报文
 			sockaddr_in sendaddr;
 			changeOldId(&message, &sendaddr);
-			printMessage(message);
+			//printMessage(message);
 			int sendNum = message2string(&message, buf);
 
 			printf("send buf:\n");
@@ -880,7 +904,7 @@ void recvAndSend() {
 			}
 			printf("\n");
 
-			printf("before send to dns\n");
+			//printf("before send to dns\n");
 			dns2cache(&message);
 			sendto(mySock, buf, sendNum, 0, (sockaddr*)&sendaddr, sLen);
 			inet_ntop(AF_INET, &sendaddr.sin_addr, ip, 20);
@@ -892,7 +916,9 @@ void recvAndSend() {
 }
 
 
-int main() {
+int main(int argc,char* argv[]) {
+	argNum = argc;
+	argArray = argv;
 	initSock();
 	while (1) {
 		recvAndSend();

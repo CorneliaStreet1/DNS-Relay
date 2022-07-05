@@ -1,3 +1,4 @@
+#pragma once
 #include "LinkedListNode.h"
 typedef struct Linked_List
 {
@@ -15,5 +16,6 @@ int isEmpty(LinkedList* List);
 int Size(LinkedList* List);
 void printList(LinkedList* List);
 Node* get(LinkedList* List, int index);
-Node* RemoveNode();
+void RemoveNode(LinkedList* List, char* DomainName);
+
 

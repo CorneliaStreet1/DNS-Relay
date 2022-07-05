@@ -11,7 +11,7 @@ Result* Get_Cached_IP_By_DomainName(HashCacheTable* Table, char* DomainName) {
     printf("Searching By DomainName: ");
     printf(DomainName);
     printf("\n");
-    return Get_IP_By_DomainName(Table->CacheTable, DomainName);
+    return Get_IP_By_DomainName(Table->CacheTable, DomainName,Table->LRUList);
 }
 void AddNewItem(HashCacheTable* Table, char* DomainName, char* IP) {
     int index = getIndex(DomainName);
@@ -37,7 +37,7 @@ void AddNewItem(HashCacheTable* Table, char* DomainName, char* IP) {
         printf(DomainName);
         printf("\n");
     }
-    printf("\n这里这里开始\n");
+    printf("\n当前缓存LRU\n");
     printList(Table->LRUList);
     printf("这里这里结束\n\n");
 }
