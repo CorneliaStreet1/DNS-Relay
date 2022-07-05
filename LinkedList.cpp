@@ -1,6 +1,7 @@
 #include "LinkedList.h"
 #include<stdlib.h>
 #include<stdio.h>
+#include<string.h>
 LinkedList * GetEmptyList() {
     LinkedList* list =(LinkedList*) malloc(sizeof(LinkedList));
     list->Size = 0;
@@ -85,6 +86,30 @@ void printList(LinkedList* List) {
         printf("\n");
         p = p->Next;
     }
+}
+Node* RemoveNode(LinkedList* List, char* DomainName) {
+    Node* p = List->Head->Next;
+    while (p != List->Tail)
+    {
+        if (p != NULL && strcmp(p, DomainName) == 0)
+        {
+            Node
+            Node* nextNode = p->Next;
+            Node* PreviousNode = p->Previous;
+            next->Previous = PreviousNode;
+            PreviousNode->Next = nextNode;
+            printf("In RemoveNode(), Removed:");
+            printf(DomainName);
+            printf("\n");
+            free(p);
+            p = nextNode;
+        }
+        else {
+            p = p->Next
+        }
+        
+    }
+    
 }
 Node* get(LinkedList* List, int index) {
     Node* p = List->Head->Next;

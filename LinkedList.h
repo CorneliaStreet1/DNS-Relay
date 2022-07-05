@@ -15,5 +15,5 @@ int isEmpty(LinkedList* List);
 int Size(LinkedList* List);
 void printList(LinkedList* List);
 Node* get(LinkedList* List, int index);
-
+Node* RemoveNode();
 
